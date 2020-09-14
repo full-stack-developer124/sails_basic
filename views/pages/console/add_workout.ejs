@@ -1,0 +1,328 @@
+<html>
+<style>
+ul {
+  list-style-type: none;
+  margin: 0px;
+  margin-bottom: 100px;
+  padding: 0;
+  overflow: hidden;
+}
+
+li {
+  float: left;
+  margin-left: 64px;
+}
+
+li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 32px;
+  text-decoration: none;
+}
+
+</style>
+<body>
+
+
+  <script src="bower_components/socket.io/lib/socket.js"></script>
+
+
+  Title<br>
+  <input type="text" id="workout_title_input"><br>Description</input>
+  <div></div>
+  <input type="text" id="workout_description_input"></input>
+  <div><br></div>
+
+
+    <input type="radio" id="easy" name="difficulty" value="easy">
+    <label for="male">Easy</label><br>
+    <input type="radio" id="medium" name="difficulty" value="medium">
+    <label for="female">Medium</label><br>
+    <input type="radio" id="hard" name="difficulty" value="hard">
+    <label for="other">Hard</label>
+    <div><br></div>
+
+  <a onclick="addExercisePressed()">
+    <button>Add Exercise</button>
+  </a>
+
+<button onclick="addBreakPressed()">
+Add Break
+</button>
+
+<button onclick="undoPressed()">
+Undo
+</button>
+
+<button onclick="saveWorkoutPressed()">
+Save Workout
+</button>
+
+
+<div><br></div>
+<div><br></div>
+
+<ul id="exercises_and_breaks_list">
+</ul>
+
+<script>
+
+var components = localStorage.getItem("components");
+
+if (components == null) {
+  var array = JSON.stringify([[{"duration": 15, "uuid": uuidv4()}]]);
+  localStorage.setItem("components", array);
+  var ul = document.getElementById("exercises_and_breaks_list");
+  var li = document.createElement("li");
+  li.appendChild(document.createTextNode("intro"));
+  li.appendChild(document.createElement("div"));
+  li.appendChild(document.createTextNode("duration: 15"));
+
+  ul.appendChild(li);
+} else {
+  var componentsArray = JSON.parse(components);
+  componentsArray.forEach(function(component, i) {
+
+    var ul = document.getElementById("exercises_and_breaks_list");
+    var li = document.createElement("li");
+
+    if (Object.keys(component[0])[0] == "duration" && Object.keys(component[0])[1] == "uuid" && Object.keys(component[0])[2] == "exerciseNarratorFilePath" && Object.keys(component[0])[3] == "setValue" && Object.keys(component[0])[4] == "setType") {
+      //break found!
+      var result = parseInt(component[0]["duration"]);
+      li.appendChild(document.createTextNode("break"));
+      li.appendChild(document.createElement("div"));
+      li.appendChild(document.createTextNode("duration: " + result));
+
+      ul.appendChild(li);
+    } else if (i == 0) {
+      li.appendChild(document.createTextNode("intro"));
+      li.appendChild(document.createElement("div"));
+      li.appendChild(document.createTextNode("duration: 15"));
+
+      ul.appendChild(li);
+    } else {
+      var numberOfSets = 0;
+      var numberOfPauses = 0;
+      var exercise = "";
+
+      component.forEach(function(something){
+        if (something.exercise != null) {
+          numberOfSets += 1;
+          exercise = something.exercise.title;
+        } else if (something.setType != null) {
+          numberOfPauses += 1;
+        }
+      });
+
+
+    li.appendChild(document.createTextNode(exercise));
+    li.appendChild(document.createElement("div"));
+
+    li.appendChild(document.createTextNode(numberOfSets + " sets"));
+    li.appendChild(document.createElement("div"));
+    li.appendChild(document.createTextNode(numberOfPauses + " pauses"));
+    ul.appendChild(li);
+    }
+
+  });
+}
+
+function addBreakPressed() {
+  var result = window.prompt("enter break duration (in seconds)", "");
+
+  if (result != null) {
+    var ul = document.getElementById("exercises_and_breaks_list");
+    var li = document.createElement("li");
+
+    li.appendChild(document.createTextNode("break"));
+    li.appendChild(document.createElement("div"));
+    li.appendChild(document.createTextNode("duration: " + result));
+
+    ul.appendChild(li);
+
+    var array = JSON.parse(localStorage.getItem("components"));
+    array.push([{"duration": parseInt(result), "uuid": uuidv4(), "exerciseNarratorFilePath": "", "setValue": 0, "setType": 0}]);
+
+    localStorage.setItem("components", JSON.stringify(array));
+  }
+
+}
+
+function addExercisePressed() {
+  var array = JSON.parse(localStorage.getItem("components"));
+  var keys = Object.keys(array[array.length - 1][0]);
+  if (JSON.stringify(keys) == JSON.stringify(["duration", "uuid", "exerciseNarratorFilePath", "setValue", "setType"])) {
+    window.location.href = "/exercises";
+  } else {
+    if (confirm("are you sure you don't want to add a break before you add a new exercise?")) {
+      window.location.href = "/exercises";
+    } else {
+    }
+  }
+}
+
+function undoPressed() {
+  var array = JSON.parse(localStorage.getItem("components"));
+  array.pop();
+  localStorage.setItem("components", JSON.stringify(array));
+  var ul = document.getElementById("exercises_and_breaks_list");
+  ul.removeChild(ul.lastElementChild);
+}
+
+window.onload=function(){
+    io.sails.url = 'http://localhost:10000';
+    io.socket.get('http://localhost:10000/data', function (body, sailsResponseObject) {
+        console.log('Sails responded with: ', body);
+        console.log('with headers: ', sailsResponseObject.headers);
+        console.log('and with status code: ', sailsResponseObject.statusCode);
+    });
+};
+
+function saveWorkoutPressed() {
+  var componentsArray = JSON.parse(localStorage.getItem("components"));
+
+  componentsArray.forEach(function(item, i){
+    item.forEach((anotherItem, j) => {
+
+      if (Object.keys(item[j])[0] === "narratorFilePath" && Object.keys(item[j])[1] === "setType" && Object.keys(item[j])[2] === "setDuration" && Object.keys(item[j])[3] === "setValue" && Object.keys(item[j])[4] === "duration" && Object.keys(item[j])[5] === "uuid") {
+        if (item.length != j + 1) {
+
+          if (Object.keys(item[j + 1])[0] == "numberOfReps" && Object.keys(item[j + 1])[1] == "weightInKg" && Object.keys(item[j + 1])[2] == "duration" && Object.keys(item[j + 1])[3] == "uuid" && Object.keys(item[j + 1])[4] == "exercise") {
+            var exercise = item[j + 1]["exercise"];
+            item[j].narratorFilePath = exercise.narratorFilePath;
+            item[j].setValue = item[j + 1]["weightInKg"];
+            item[j].setType = 1;
+
+          } else if (Object.keys(item[j + 1])[0] == "weightInKg" && Object.keys(item[j + 1])[1] == "duration" && Object.keys(item[j + 1])[2] == "uuid" && Object.keys(item[j + 1])[3] == "exercise") {
+            var exercise = item[j + 1]["exercise"];
+            item[j].narratorFilePath = exercise.narratorFilePath;
+            item[j].setValue = item[j + 1]["weightInKg"];
+            item[j].setType = 2;
+
+          } else if (Object.keys(item[j + 1])[0] == "numberOfReps" && Object.keys(item[j + 1])[1] == "percentage" && Object.keys(item[j + 1])[2] == "duration" && Object.keys(item[j + 1])[3] == "uuid" && Object.keys(item[j + 1])[4] == "exercise") {
+            console.log("percentage set found!");
+            var exercise = item[j + 1]["exercise"];
+            item[j].narratorFilePath = exercise.narratorFilePath;
+            item[j].setValue = item[j + 1]["percentage"];
+            item[j].setType = 3;
+          } else if (Object.keys(item[j + 1])[0] == "percentage" && Object.keys(item[j + 1])[1] == "duration" && Object.keys(item[j + 1])[2] == "uuid" && Object.keys(item[j + 1])[3] == "exercise") {
+            console.log("timed percentage set found!");
+            var exercise = item[j + 1]["exercise"];
+            item[j].narratorFilePath = exercise.narratorFilePath;
+            item[j].setValue = item[j + 1]["percentage"];
+            item[j].setType = 4;
+          }
+
+        }
+
+      }
+
+    });
+    if (Object.keys(componentsArray[i][0])[0] == "duration" && Object.keys(componentsArray[i][0])[1] == "uuid" && Object.keys(componentsArray[i][0])[2] == "exerciseNarratorFilePath" && Object.keys(componentsArray[i][0])[3] == "setValue" && Object.keys(componentsArray[i][0])[4] == "setType") {
+      if (Object.keys(componentsArray[i + 1][0])[0] == "numberOfReps" && Object.keys(componentsArray[i + 1][0])[1] == "weightInKg" && Object.keys(componentsArray[i + 1][0])[2] == "duration" && Object.keys(componentsArray[i + 1][0])[3] == "uuid" && Object.keys(componentsArray[i + 1][0])[4] == "exercise") {
+        var exercise = componentsArray[i + 1][0]["exercise"];
+        componentsArray[i][0].exerciseNarratorFilePath = exercise.narratorFilePath;
+        componentsArray[i][0].setType = 1;
+        componentsArray[i][0].setValue = componentsArray[i + 1][0]["weightInKg"];
+      } else if (Object.keys(componentsArray[i + 1][0])[0] == "weightInKg" && Object.keys(componentsArray[i + 1][0])[1] == "duration" && Object.keys(componentsArray[i + 1][0])[2] == "uuid" && Object.keys(componentsArray[i + 1][0])[3] == "exercise") {
+        console.log("timed set found");
+        var exercise = componentsArray[i + 1][0]["exercise"];
+        componentsArray[i][0].exerciseNarratorFilePath = exercise.narratorFilePath;
+        componentsArray[i][0].setType = 2;
+        componentsArray[i][0].setValue = componentsArray[i + 1][0]["weightInKg"];
+      } else if (Object.keys(componentsArray[i + 1][0])[0] == "numberOfReps" && Object.keys(componentsArray[i + 1][0])[1] == "percentage" && Object.keys(componentsArray[i + 1][0])[2] == "duration" && Object.keys(componentsArray[i + 1][0])[3] == "uuid" && Object.keys(componentsArray[i + 1][0])[4] == "exercise") {
+        console.log("percentage set found!");
+        var exercise = componentsArray[i + 1][0]["exercise"];
+        componentsArray[i][0].exerciseNarratorFilePath = exercise.narratorFilePath;
+        componentsArray[i][0].setType = 3;
+        componentsArray[i][0].setValue = componentsArray[i + 1][0]["percentage"];
+      } else if (Object.keys(componentsArray[i + 1][0])[0] == "percentage" && Object.keys(componentsArray[i + 1][0])[1] == "duration" && Object.keys(componentsArray[i + 1][0])[2] == "uuid" && Object.keys(componentsArray[i + 1][0])[3] == "exercise") {
+        console.log("timed percentage set found!");
+        var exercise = componentsArray[i + 1][0]["exercise"];
+        componentsArray[i][0].exerciseNarratorFilePath = exercise.narratorFilePath;
+        componentsArray[i][0].setType = 4;
+        componentsArray[i][0].setValue = componentsArray[i + 1][0]["percentage"];
+      }
+
+    }
+
+  });
+
+  var workoutDuration = 0;
+  componentsArray.forEach(function(item, i){
+    item.forEach(function(component, j){
+      workoutDuration += parseInt(component["duration"]);
+    });
+  });
+  componentsArray.push([{duration: 0, type: 0, uuid: uuidv4()}])
+  localStorage.setItem("components", JSON.stringify(componentsArray));
+
+  var title = document.getElementById("workout_title_input").value;
+  var description = document.getElementById("workout_description_input").value;
+  var trainerId = JSON.parse(localStorage.getItem("trainer")).uuid
+
+  var level = 0;
+
+  if (document.getElementById("easy").checked == true) {
+    level = 0;
+  } else if (document.getElementById("medium").checked == true) {
+    level = 1;
+  } else if (document.getElementById("hard").checked == true) {
+    level = 2;
+  }
+
+  const now = new Date()
+  const secondsSinceEpoch = Math.round(now.getTime() / 1000)
+
+  var exercises = JSON.parse(localStorage.getItem("exercises"));
+
+  var musclegroups = []
+  var equipment = []
+  exercises.forEach((exercise, i) => {
+    musclegroups.push(exercise.category)
+
+    exercise.equipment.forEach((equipmentObject, i) => {
+      equipment.push(equipmentObject)
+    });
+  });
+
+  var trainer = localStorage.getItem("trainer")
+  if (trainer) {
+    var id = uuidv4();
+
+    var workout = {components: componentsArray, date: secondsSinceEpoch, description: description, exercises: exercises, id: id, level: level, personalTrainer: trainer, personalTrainerId: trainerId, title: title, duration: workoutDuration, equipment: equipment, musclegroups: musclegroups};
+    let json = JSON.stringify(workout);
+
+    if (json) {
+      let url = "/addWorkoutToDB";
+      let request = new XMLHttpRequest();
+          request.open("POST", url, true);
+          request.setRequestHeader("Content-Type", "application/json");
+          request.onreadystatechange = function() {
+            let message = JSON.parse(request.responseText).message
+            alert("message: " + message)
+            window.location.href = "/home"
+          }
+          request.send(json);
+    }
+  } else {
+    alert("You are not authenticated as a trainer ")
+  }
+
+
+
+
+}
+
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+</script>
+
+</body>
+</html>

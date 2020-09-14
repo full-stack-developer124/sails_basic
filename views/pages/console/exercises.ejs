@@ -1,0 +1,48 @@
+<html>
+<body>
+
+  <table style="width:100%" id="ex-table">
+  <tr id="tr">
+  <th>Title</th>
+    <th>Category</th>
+    <th>Description</th>
+    <th>File Path</th>
+    <th>ID</th>
+ </table>
+
+<script>
+
+
+  let request = new XMLHttpRequest();
+  request.onreadystatechange = function() {
+    let objects = JSON.parse(request.responseText)
+    var content = '';
+    var index = 0;
+    objects.forEach((item, i) => {
+      console.log(JSON.stringify(item));
+      content +="<tr data-href=" + index + ">";
+      content += '<td>' + item.title + '</td>';
+      content += '<td>' + item.category + '</td>';
+      content += '<td>' + item.exerciseDescription + '</td>';
+      content += '</tr>';
+      index += 1;
+    });
+    $('#ex-table').append(content);
+
+    const rows = document.querySelectorAll("tr[data-href]");
+    rows.forEach(row => {
+      row.addEventListener("click", () => {
+        var queryString = JSON.stringify(objects[parseInt(row.dataset.href)]);
+
+        localStorage.setItem("selectedExercise", queryString);
+        window.location.href = "/configureExercise";
+
+      });
+    });
+  }
+  request.open('GET', '/fetchExercises', true)
+  request.send(null);
+</script>
+
+</body>
+</html>

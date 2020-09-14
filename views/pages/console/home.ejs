@@ -1,0 +1,99 @@
+<html>
+<body>
+
+  <h1>Personal Trainer ID</h1>
+  <input type="text" id="personal_trainer_id_input_home"></input>
+  <div></div>
+  <br>
+  <a onclick="addWorkoutPressed()">
+    <button>Add Workout</button>
+  </a>
+
+  <a onclick="addWorkoutPlanPressed()">
+    <button>Add Plan</button>
+  </a>
+
+  <script>
+
+  localStorage.removeItem("components");
+  localStorage.removeItem("weeks");
+  localStorage.removeItem("exercises");
+  localStorage.removeItem("week_workouts");
+
+  if (localStorage.getItem("trainer")) {
+    let trainer = JSON.parse(localStorage.getItem("trainer"));
+    document.getElementById("personal_trainer_id_input_home").value = trainer.uuid
+  }
+
+  function addWorkoutPlanPressed() {
+    if (localStorage.getItem("trainer")) {
+      window.location.href = "/addWorkoutPlan"
+    } else {
+      let id = document.getElementById('personal_trainer_id_input_home').value
+
+      let request = new XMLHttpRequest();
+      request.onreadystatechange = function() {
+        let trainer = JSON.parse(request.responseText)
+        localStorage.setItem("trainer", request.responseText);
+
+        if (trainer.name) {
+          window.location.href = "/addWorkoutPlan"
+        } else {
+          alert("Login Failed")
+        }
+
+      }
+      request.open('GET', '/fetchTrainerById?id=' + id, true)
+      request.send(null);
+    }
+  }
+
+  function addWorkoutPressed() {
+
+
+    if (localStorage.getItem("trainer")) {
+      if (document.getElementById('personal_trainer_id_input_home').value != localStorage.getItem("trainer")) {
+        let id = document.getElementById('personal_trainer_id_input_home').value
+
+        let request = new XMLHttpRequest();
+        request.onreadystatechange = function() {
+          let trainer = JSON.parse(request.responseText)
+          localStorage.setItem("trainer", request.responseText);
+
+          if (trainer.name) {
+            window.location.href = "/addWorkout"
+          } else {
+            alert("Login Failed")
+          }
+
+        }
+        request.open('GET', '/fetchTrainerById?id=' + id, true)
+        request.send(null);
+      } else {
+        window.location.href = "/addWorkout"
+      }
+    } else {
+      let id = document.getElementById('personal_trainer_id_input_home').value
+
+      let request = new XMLHttpRequest();
+      request.onreadystatechange = function() {
+        let trainer = JSON.parse(request.responseText)
+        localStorage.setItem("trainer", request.responseText);
+
+        if (trainer.name) {
+          window.location.href = "/addWorkout"
+        } else {
+          alert("Login Failed")
+        }
+
+      }
+      request.open('GET', '/fetchTrainerById?id=' + id, true)
+      request.send(null);
+    }
+
+  }
+
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,59 @@
+<html>
+<body>
+<div></div>
+<table style="width:100%" id="ex-table">
+<tr id="tr">
+<th>Title</th>
+  <th>Category</th>
+</table>
+
+<script>
+
+let trainer = JSON.parse(localStorage.getItem("trainer"))
+let trainerId = trainer.uuid
+
+let url = "/fetchWorkoutByTrainerId?trainerId=" + trainerId;
+let request = new XMLHttpRequest();
+var hasConfigured = false
+request.onload = function(e) {
+
+    var workouts = JSON.parse(request.responseText)
+    console.log(workouts);
+
+    var content = '';
+    var index = 0;
+    workouts.forEach((workout, i) => {
+      content +="<tr data-href=" + index + ">";
+      content += '<td>' + workout.title + '</td>';
+      content += '<td>' + "yes" + '</td>';
+      content += '</tr>';
+      index += 1;
+    });
+
+    $('#ex-table').append(content);
+
+    const rows = document.querySelectorAll("tr[data-href]");
+    rows.forEach(row => {
+      row.onclick = function() {
+        var array = JSON.parse(localStorage.getItem("week_workouts"));
+        array.push({"workoutTitle": workouts[parseInt(row.dataset.href)].title, "workoutDuration": workouts[parseInt(row.dataset.href)].duration, "workoutId": workouts[parseInt(row.dataset.href)].id, "id": uuidv4(), "weekday": localStorage.getItem("day_currently_configuring")});
+        localStorage.setItem("week_workouts", JSON.stringify(array));
+        
+        window.location.href = "/configureWeek";
+      }
+    });
+}
+request.open('GET', url, true)
+request.send(null);
+
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+</script>
+
+</body>
+</html>

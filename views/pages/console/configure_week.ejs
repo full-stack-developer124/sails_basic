@@ -1,0 +1,178 @@
+<html>
+<body>
+<button onclick="finishPressed()">Finish this week</button>
+  <table style="width:100%" id="ex-table">
+  <tr id="tr">
+  <th>
+    Monday
+    <br>
+    <button onclick="addMondayWorkoutPressed()">Add Workout</button>
+  </th>
+    <th>
+      Tuesday
+      <br>
+      <button onclick="addTuesdayWorkoutPressed()">Add Workout</button>
+    </th>
+    <th>
+      Wednesday
+      <br>
+      <button onclick="addWednesdayWorkoutPressed()">Add Workout</button>
+    </th>
+    <th>
+      Thursday
+      <br>
+      <button onclick="addThursdayWorkoutPressed()">Add Workout</button>
+    </th>
+    <th>
+      Friday
+      <br>
+      <button onclick="addFridayWorkoutPressed()">Add Workout</button>
+    </th>
+    <th>
+      Saturday
+      <br>
+      <button onclick="addSaturdayWorkoutPressed()">Add Workout</button>
+    </th>
+    <th>
+      Sunday
+      <br>
+      <button onclick="addSundayWorkoutPressed()">Add Workout</button>
+    </th>
+  </table>
+
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>
+
+  function addMondayWorkoutPressed() {
+    localStorage.setItem("day_currently_configuring", "monday");
+    window.location.href = "/workoutsByTrainer";
+  }
+
+  function addTuesdayWorkoutPressed() {
+    localStorage.setItem("day_currently_configuring", "tuesday");
+    window.location.href = "/workoutsByTrainer";
+  }
+
+  function addWednesdayWorkoutPressed() {
+    localStorage.setItem("day_currently_configuring", "wednesday");
+    window.location.href = "/workoutsByTrainer";
+  }
+
+  function addThursdayWorkoutPressed() {
+    localStorage.setItem("day_currently_configuring", "thursday");
+    window.location.href = "/workoutsByTrainer";
+  }
+
+  function addFridayWorkoutPressed() {
+    localStorage.setItem("day_currently_configuring", "friday");
+    window.location.href = "/workoutsByTrainer";
+  }
+
+  function addSaturdayWorkoutPressed() {
+    localStorage.setItem("day_currently_configuring", "saturday");
+    window.location.href = "/workoutsByTrainer";
+  }
+
+  function addSundayWorkoutPressed() {
+    localStorage.setItem("day_currently_configuring", "sunday");
+    window.location.href = "/workoutsByTrainer";
+  }
+
+  function finishPressed() {
+    localStorage.removeItem("day_currently_configuring");
+    var week = JSON.parse(localStorage.getItem("week_workouts"));
+    var weeks = JSON.parse(localStorage.getItem("weeks"));
+    weeks.push(week);
+    localStorage.setItem("weeks", JSON.stringify(weeks));
+    localStorage.removeItem("week_workouts");
+    window.location.href = "/addWorkoutPlan";
+  }
+
+    if (localStorage.getItem("week_workouts") == null) {
+      localStorage.setItem("week_workouts", JSON.stringify([]));
+    }
+
+    var weekWorkouts = JSON.parse(localStorage.getItem("week_workouts"));
+    var content = '';
+    weekWorkouts.forEach(function(workout) {
+
+      if (workout.weekday == "monday") {
+        content +="<tr data-href=" + ">";
+        content += '<td>' + workout.workoutTitle + '</td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '</tr>';
+      } else if (workout.weekday == "tuesday") {
+        content +="<tr data-href=" + ">";
+        content += '<td></td>';
+        content += '<td>' + workout.workoutTitle + '</td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '</tr>';
+      } else if (workout.weekday == "wednesday") {
+        content +="<tr data-href=" + ">";
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td>' + workout.workoutTitle + '</td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '</tr>';
+      } else if (workout.weekday == "thursday") {
+        content +="<tr data-href=" + ">";
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td>' + workout.workoutTitle + '</td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '</tr>';
+      } else if (workout.weekday == "friday") {
+        content +="<tr data-href=" + ">";
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td>' + workout.workoutTitle + '</td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '</tr>';
+      } else if (workout.weekday == "saturday") {
+        content +="<tr data-href=" + ">";
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td>' + workout.workoutTitle + '</td>';
+        content += '<td></td>';
+        content += '</tr>';
+      } else if (workout.weekday == "sunday") {
+        content +="<tr data-href=" + ">";
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td></td>';
+        content += '<td>' + workout.workoutTitle + '</td>';
+        content += '</tr>';
+      }
+
+    });
+
+    $('#ex-table').append(content);
+
+  </script>
+
+</body>
+</html>

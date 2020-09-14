@@ -1,0 +1,139 @@
+<html>
+<body>
+
+  Title<br>
+  <input type="text" id="program_title_input"><br>Description</input>
+  <div></div>
+  <textarea id="program_description_input" cols="40" rows="5"></textarea>
+  <div></div>
+
+  <div><br></div>
+  <input type="radio" id="Hypertrophy" name="difficulty" value="easy">
+  <label for="male">Hypertraphy</label><br>
+  <input type="radio" id="Strength" name="difficulty" value="medium">
+  <label for="female">Strength</label><br>
+  <input type="radio" id="Endurance" name="difficulty" value="hard">
+  <label for="other">Endurance</label>
+  <div><br></div>
+
+  <div><br></div>
+  <div><br></div>
+<button onclick="duplicateWeekPressed()">
+  Duplicate Last Week
+</button>
+<button onclick="addWeekPressed()">
+  Add Week
+</button>
+<button onclick="saveProgramPressed()">
+  Save Plan
+</button>
+
+<ul id="weeks_list">
+</ul>
+
+<script>
+
+if (localStorage.getItem("weeks") == null) {
+  localStorage.setItem("weeks", JSON.stringify([]));
+} else {
+  var weeks = JSON.parse(localStorage.getItem("weeks"));
+  console.log(weeks);
+  var ul = document.getElementById("weeks_list");
+
+  weeks.forEach(function(item, i){
+    var li = document.createElement("li");
+    li.appendChild(document.createTextNode(i + ". week"));
+
+    ul.appendChild(li);
+  });
+
+}
+
+function duplicateWeekPressed() {
+  var weeks = JSON.parse(localStorage.getItem("weeks"));
+  let latestWeek = weeks[weeks.length - 1];
+  weeks.push(latestWeek);
+  localStorage.setItem("weeks", JSON.stringify(weeks));
+  window.location.reload();
+}
+
+function addWeekPressed() {
+  window.location.href = "/configureWeek";
+}
+
+function saveProgramPressed() {
+
+  var title = document.getElementById("program_title_input").value;
+  var description = document.getElementById("program_description_input").value;
+
+  var weeks = JSON.parse(localStorage.getItem("weeks"));
+
+  const now = new Date()
+  const secondsSinceEpoch = Math.round(now.getTime() / 1000)
+
+  var focus = 0;
+
+  if (document.getElementById("Hypertrophy").checked == true) {
+    focus = 0;
+  } else if (document.getElementById("Strength").checked == true) {
+    focus = 1;
+  } else if (document.getElementById("Endurance").checked == true) {
+    focus = 2;
+  }
+  var numberOfDaysArray = []
+  weeks.forEach((week, i) => {
+    let daysCount = week.length
+    numberOfDaysArray.push(daysCount)
+  });
+
+  let maxWorkoutsPerWeek = Math.max(...numberOfDaysArray)
+  let minWorkoutsPerWeek = Math.min(...numberOfDaysArray)
+
+  var trainer = localStorage.getItem("trainer")
+  if (trainer) {
+
+    var json = JSON.stringify({
+      id: uuidv4(),
+      numberOfWeeks: weeks.length,
+      weeks: JSON.stringify(weeks),
+      title: title,
+      description: description,
+      personalTrainerId: JSON.parse(trainer).uuid,
+      personalTrainer: trainer,
+      date: secondsSinceEpoch,
+      focus: focus,
+      min_nwpw: minWorkoutsPerWeek,
+      max_nwpw: maxWorkoutsPerWeek
+    })
+
+    console.log(json);
+
+    let url = "/addWorkoutPlanToDB";
+    let request = new XMLHttpRequest();
+        request.open("POST", url, true);
+        request.setRequestHeader("Content-Type", "application/json");
+        request.onload = function(e) {
+          let message = JSON.parse(request.responseText).message
+          alert("message: " + message)
+          window.location.href = "/home"
+        }
+        request.send(json);
+
+  } else {
+    alert("You are not authenticated as a trainer ")
+  }
+
+
+}
+
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+</script>
+
+</body>
+</html>

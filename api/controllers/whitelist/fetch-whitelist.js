@@ -1,0 +1,39 @@
+var mysqlStore = sails.getDatastore()
+
+module.exports = {
+
+
+  friendlyName: 'Fetch whitelist',
+
+
+  description: '',
+
+
+  inputs: {
+
+  },
+
+
+  exits: {
+    success: {
+      message: "Fetched trainers successfully!",
+      responseType: "okWithJSON"
+    }
+  },
+
+
+  fn: async function (inputs, exits) {
+    let queryString = "SELECT * FROM white_list"
+
+    mysqlStore.sendNativeQuery(queryString).exec(function (error, result) {
+      if (error) {
+        console.log("ERROR: " + error)
+      } else {
+        return exits.success(result.rows)
+      }
+
+    })
+  }
+
+
+};

@@ -1,0 +1,342 @@
+<html>
+<style>
+ul {
+  list-style-type: none;
+  margin: 0px;
+  margin-bottom: 100px;
+  padding: 0;
+  overflow: hidden;
+}
+
+li {
+  float: left;
+  margin-left: 64px;
+}
+
+li a {
+  display: block;
+  color: white;
+  text-align: center;
+  padding: 32px;
+  text-decoration: none;
+}
+
+</style>
+<body>
+<button onclick="donePressed()">Done</button>
+<button onclick="undoPressed()">Undo</button>
+<h1 id="title">
+Configure (some exercise)
+</h1>
+
+<ul id="menu">
+    <li>
+      <h3>
+      Regular Set
+    </h3>
+    Reps<br>
+    <input type="text" id="regular_set_reps_input"><br>kG</input>
+    <div></div>
+    <input type="text" id="regular_set_kg_input"><br>Duration</input>
+    <div></div>
+    <input type="text" id="regular_set_duration_input"></input>
+    <div></div>
+    <button onclick="addRegularSet()">
+      Add Regular Set
+    </button>
+    </li>
+    <li>
+      <h3>
+      Timed Set
+    </h3>
+    kG<br>
+    <input type="text" id="timed_set_kg_input"><br>Duration</input>
+    <div></div>
+    <input type="text" id="timed_set_duration_input"></input>
+    <div></div>
+    <button onclick="addTimedSet()">
+      Add Timed Set
+    </button>
+    </li>
+    <li>
+      <h3>
+      Percentage Set
+    </h3>
+    Reps<br>
+    <input type="text" id="percentage_set_reps_input"><br>Percentage</input>
+    <div></div>
+    <input type="text" id="percentage_set_percent_input"><br>Duration</input>
+    <div></div>
+    <input type="text" id="percentage_set_duration_input"></input>
+    <div></div>
+    <button onclick="addPercentageSet()">
+      Add Percentage Set
+    </button>
+    </li>
+    <li>
+      <h3>
+      Timed Percentage Set
+    </h3>
+    Percentage
+    <div></div>
+    <input type="text" id="timed_percentage_set_percent_input"><br>Duration</input>
+    <div></div>
+    <input type="text" id="timed_percentage_set_duration_input"></input>
+    <div></div>
+    <button onclick="addTimedPercentageSet()">
+      Add Timed Percentage Set
+    </button>
+    </li>
+    <li>
+      <h3>
+      Set Pause
+    </h3>
+    Duration<br>
+    <input type="text" id="set_pause_duration_input"></input>
+    <div></div>
+    <button onclick="addExerciseSetPause()">
+      Add Set Pause
+    </button>
+    </li>
+</ul>
+
+<h3>
+Sets and pauses:
+</h3>
+
+<ul id="sets_and_reps_list">
+</ul>
+
+<script>
+
+var selectedExercise = localStorage.getItem("selectedExercise");
+document.getElementById("title").innerHTML = "configure " + JSON.parse(selectedExercise).title;
+
+var component = [];
+var index = 0;
+
+function addRegularSet() {
+
+  var reps = parseInt(document.getElementById("regular_set_reps_input").value);
+  var weightInKg = parseInt(document.getElementById("regular_set_kg_input").value);
+  var duration = parseInt(document.getElementById("regular_set_duration_input").value);
+
+  if (Number.isNaN(reps) == true || Number.isNaN(weightInKg) == true || Number.isNaN(duration) == true) {
+    window.alert("You need to fill all fields with valid numbers");
+  } else {
+    var regularSetObject = {
+
+      "numberOfReps": reps,
+      "weightInKg": weightInKg,
+      "duration": duration,
+      "uuid": uuidv4(),
+      "exercise": JSON.parse(localStorage.getItem("selectedExercise")),
+
+    };
+
+  component.push(regularSetObject);
+  var ul = document.getElementById("sets_and_reps_list");
+  var li = document.createElement("li");
+
+  var firstDiv = document.createElement("div");
+  firstDiv.innerHTML = "_";
+  li.appendChild(document.createTextNode((index + 1) + ". " + "Regular Set"));
+  li.appendChild(firstDiv);
+  li.appendChild(document.createTextNode("reps: " + reps));
+  li.appendChild(document.createElement("div"));
+  li.appendChild(document.createTextNode("kg: " + weightInKg));
+  li.appendChild(document.createElement("div"));
+  li.appendChild(document.createTextNode("duration: " + duration));
+
+  ul.appendChild(li);
+  index += 1;
+  }
+
+}
+
+function addTimedSet() {
+
+  var weightInKg = parseInt(document.getElementById("timed_set_kg_input").value);
+  var duration = parseInt(document.getElementById("timed_set_duration_input").value);
+
+  if (Number.isNaN(weightInKg) == true || Number.isNaN(duration) == true) {
+    window.alert("You need to fill all fields with valid numbers");
+  } else {
+    var regularSetObject = {
+
+      "weightInKg": weightInKg,
+      "duration": duration,
+      "uuid": uuidv4(),
+      "exercise": JSON.parse(localStorage.getItem("selectedExercise")),
+
+    };
+
+  component.push(regularSetObject);
+
+  var ul = document.getElementById("sets_and_reps_list");
+  var li = document.createElement("li");
+
+  var firstDiv = document.createElement("div");
+  firstDiv.innerHTML = "_";
+  li.appendChild(document.createTextNode((index + 1) + ". " + "Timed Set"));
+  li.appendChild(firstDiv);
+  li.appendChild(document.createTextNode("kg: " + weightInKg));
+  li.appendChild(document.createElement("div"));
+  li.appendChild(document.createTextNode("duration: " + duration));
+
+  ul.appendChild(li);
+  index += 1;
+  }
+
+}
+
+function addPercentageSet() {
+
+  var reps = parseInt(document.getElementById("percentage_set_reps_input").value);
+  var percent = parseInt(document.getElementById("percentage_set_percent_input").value);
+  var duration = parseInt(document.getElementById("percentage_set_duration_input").value);
+
+  if (Number.isNaN(reps) == true || Number.isNaN(percent) == true || Number.isNaN(duration) == true) {
+    window.alert("You need to fill all fields with valid numbers");
+  } else {
+    var regularSetObject = {
+
+      "numberOfReps": reps,
+      "percentage": percent,
+      "duration": duration,
+      "uuid": uuidv4(),
+      "exercise": JSON.parse(localStorage.getItem("selectedExercise")),
+
+    };
+
+  component.push(regularSetObject);
+
+  var ul = document.getElementById("sets_and_reps_list");
+  var li = document.createElement("li");
+
+  var firstDiv = document.createElement("div");
+  firstDiv.innerHTML = "_";
+  li.appendChild(document.createTextNode((index + 1) + ". " + "Percentage Set"));
+  li.appendChild(firstDiv);
+  li.appendChild(document.createTextNode("reps: " + reps));
+  li.appendChild(document.createElement("div"));
+  li.appendChild(document.createTextNode("percent: " + percent));
+  li.appendChild(document.createElement("div"));
+  li.appendChild(document.createTextNode("duration: " + duration));
+
+  ul.appendChild(li);
+  index += 1;
+  }
+
+}
+
+function addTimedPercentageSet() {
+
+  var percent = parseInt(document.getElementById("timed_percentage_set_percent_input").value);
+  var duration = parseInt(document.getElementById("timed_percentage_set_duration_input").value);
+
+  if (Number.isNaN(percent) == true || Number.isNaN(duration) == true) {
+    window.alert("You need to fill all fields with valid numbers");
+  } else {
+    var regularSetObject = {
+
+      "percentage": percent,
+      "duration": duration,
+      "uuid": uuidv4(),
+      "exercise": JSON.parse(localStorage.getItem("selectedExercise")),
+
+    };
+
+  component.push(regularSetObject);
+  var ul = document.getElementById("sets_and_reps_list");
+  var li = document.createElement("li");
+
+  var firstDiv = document.createElement("div");
+  firstDiv.innerHTML = "_";
+  li.appendChild(document.createTextNode((index + 1) + ". " + "Timed Percentage Set"));
+  li.appendChild(firstDiv);
+  li.appendChild(document.createTextNode("percent: " + percent));
+  li.appendChild(document.createElement("div"));
+  li.appendChild(document.createTextNode("duration: " + duration));
+
+  ul.appendChild(li);
+  index += 1;
+  }
+
+}
+
+function addExerciseSetPause() {
+
+  var duration = parseInt(document.getElementById("set_pause_duration_input").value);
+
+  if (Number.isNaN(duration) == true) {
+    window.alert("You need to fill all fields with valid numbers");
+  } else {
+    var regularSetObject = {
+
+      "narratorFilePath": "",
+      "setType": 0,
+      "setDuration": 0,
+      "setValue": 0,
+      "duration": duration,
+      "uuid": uuidv4(),
+
+    };
+
+  component.push(regularSetObject);
+  var ul = document.getElementById("sets_and_reps_list");
+  var li = document.createElement("li");
+
+  var firstDiv = document.createElement("div");
+  firstDiv.innerHTML = "_";
+  li.appendChild(document.createTextNode((index + 1) + ". " + "Set Pause"));
+  li.appendChild(firstDiv);
+  li.appendChild(document.createTextNode("duration: " + duration));
+
+  ul.appendChild(li);
+  index += 1;
+  }
+
+}
+
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+function getComponentJson() {
+  return JSON.stringify(component);
+}
+
+function donePressed() {
+  var componentsArrayString = localStorage.getItem("components");
+  var componentsArray = JSON.parse(componentsArrayString);
+  componentsArray.push(component);
+  var updatedComponentsArray = JSON.stringify(componentsArray);
+  localStorage.setItem("components", updatedComponentsArray);
+
+  var exerciseArrayString = localStorage.getItem("exercises");
+  var exerciseArray = JSON.parse(exerciseArrayString);
+  if (exerciseArray == null) {
+    exerciseArray = [];
+  }
+  exerciseArray.push(JSON.parse(localStorage.getItem("selectedExercise")));
+  var updatedExerciseArray = JSON.stringify(exerciseArray);
+  localStorage.setItem("exercises", updatedExerciseArray);
+
+  window.location.href = "/addWorkout";
+}
+
+function undoPressed() {
+  component.pop();
+
+  var ul = document.getElementById("sets_and_reps_list");
+  ul.removeChild(ul.lastElementChild);
+}
+
+</script>
+
+</body>
+</html>
